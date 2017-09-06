@@ -5,14 +5,13 @@ import re
 import time
 from datetime import datetime
 
-
+from lxml import etree
 import requests
 import json
 from scrapy.selector import Selector
 from PIL import Image,ImageChops
 import cPickle
-from test_getdata import *
-
+import test_getdata
 from selenium import webdriver
 from pyvirtualdisplay import Display
 import socket
@@ -55,7 +54,7 @@ def recover(img,pos):
     #先生成一块一样大小的空图片
     im = Image.new('RGBA',size)
     cols = len(pos)/2
-    print "cols:",cols
+    # print "cols:",cols
     for count,item in enumerate(pos):
         # print count
         col = round(count/cols)
@@ -77,7 +76,7 @@ def get_dist(image1_url,image2_url):
     image2 = download_img(image2_url,'bg.jpg')
     pos = get_pos(ss)
     im1 = recover(image1,pos)
-    print "im1.size--------------------------->",im1.size
+    # print "im1.size--------------------------->",im1.size
     # im1.show()
     im2 = recover(image2,pos)
     # im2.show()
@@ -169,7 +168,7 @@ def fake_ax():
     ###callback参数最后为毫秒级的时间戳
     callback = int(round(1000*t))
     callback = str(callback)
-    print callback
+    print "callback----->",callback
     url2 = url2.replace('[__callback__]',callback)
     print url2
     res2 = requests.get(url2)
@@ -234,27 +233,31 @@ def get_validate(gt,challenge,dist):
 
         # 根据dist挑选一个路径
         # track来自文件 teg=1  否则 0
-        track,tag=choice_track_list(dist)   # 来自训练路径 tag=1
+        track,tag=test_getdata.choice_track_list(dist)   # 来自训练路径 tag=1
         print "-------track---------%s\n"%track
-        print "--------tag----------%s\n"%tag
+        print "--------tag----------\n"
+        # print "--------tag----------%s\n"%tag
         # 规范化轨迹数据  [[x,y,t],...]
-        track_list=format_track(track)  # 路径列表
-        print "track_list---------------->\n",track_list
+        track_list=test_getdata.format_track(track)  # 路径列表
+        print "track_list----------------\n"
+        # print "track_list---------------->\n",track_list
 
         # 若tag==0,即轨迹数据不在已收集的轨迹文件中（来自候选轨迹列表）,
         # 则截取路径（从中截取需要的长度）
         if tag!=1:
-            new_track_list=create_track(track_list,dist)
-            print "if---------new_track_list---------%s\n"%new_track_list
+            new_track_list=test_getdata.create_track(track_list,dist)
+            # print "if---------new_track_list---------%s\n"%new_track_list
+            print "if---------new_track_list---------\n"
         else:
             # tag==1 轨迹数据来自文件 直接赋值
             new_track_list=track_list
-            print "else---------new_track_list---------%s\n"%new_track_list
+            print "else---------new_track_list---------\n"
+            # print "else---------new_track_list---------%s\n"%new_track_list
         print "new_track_list------------->\n",new_track_list
 
         # 根据challenge和 new_track_list 
         # 计算 userresponse 和 a 参数
-        userresponse,a=get_userresponse_a(challenge,new_track_list)
+        userresponse,a=test_getdata.get_userresponse_a(challenge,new_track_list)
         print 'userresponse:------------------>',userresponse
         print 'a:----------------------------->',a
 
@@ -267,7 +270,7 @@ def get_validate(gt,challenge,dist):
         time.sleep(2)
 
         # 获得 validate
-        validate=parse_3(url,gt,challenge,userresponse,passtime,a)
+        validate=test_getdata.parse_3(url,gt,challenge,userresponse,passtime,a)
 
         time.sleep(2)
 
@@ -279,7 +282,7 @@ def get_validate(gt,challenge,dist):
     except Exception,e:
         print "error happens------------------------>"
         print e
-        return '',''
+        return '','error validate'
 
     def get_uri(page):
         links=[]
@@ -350,7 +353,8 @@ if "__main__" == __name__:
         print dist
         # print (get_pos(ss))
         challenge, validate = get_validate(gt,challenge,dist)
-        print "\n######################validate########################",validate
+        print "\n######################validate########################"
+        print "validate---->",validate
         data = {
             "searchword": searchword, 
             "geetest_challenge": challenge, 
@@ -360,7 +364,7 @@ if "__main__" == __name__:
             "geetest_validate": validate,
             'page':str(pageNo)
             }
-
+        print data
         # 谨慎(请求必须加上headers) 稍不注意 就被短暂封ip
         if validate!=None:
             res=requests.post(data_href,headers=headers,data=data).content
@@ -368,15 +372,16 @@ if "__main__" == __name__:
 
             page=etree.HTML(res)
 
-            links=get_uri(page)
+            links=test_getdata.get_uri(page)
 
-            print '查询结果如下:'
+            print '查询结果如下:\n\n\n\n\n'
             result_path = searchword+'.txt'
+            print "result_path---------->",result_path
             # result_path = '/home/moma/Documents/codes/capture_project/results/'+searchword+'.txt'
             # with open(result_path,'wb') as f:
             for link in links:
                 print link
-                write_result(link,headers)
+                # write_result(link,headers)
                 # capture(link)
                     # f.write(link+'\n')
                 # content = requests.get(link,headers=headers).content
