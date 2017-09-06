@@ -1,0 +1,23 @@
+//*[@id="Label3"]/p[14]
+//*[@id="Htitle"]
+#Htitle
+
+/html/body/div[5]/div[2]/div[3]/div[2]/a[1]
+
+from scrapy.selector import Selector
+
+sel = Selector(text = response.content)
+
+result = sel.xpath('~~~/text()').extract()
+
+data = result
+
+info = data[0].xpath('string(.)').extract()
+
+print ','.join(info)
+
+
+
+
+
+print sel.xpath('//div[@class="details clearfix"]/div')[0].extract()

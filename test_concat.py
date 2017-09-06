@@ -8,9 +8,19 @@ from datetime import datetime
 
 import requests
 import json
+from scrapy.selector import Selector
 from PIL import Image,ImageChops
 import cPickle
 from test_getdata import *
+
+from selenium import webdriver
+from pyvirtualdisplay import Display
+import socket
+socket.setdefaulttimeout(20)
+
+
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 ss ="""<div class="gt_cut_fullbg gt_show"><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -157px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -145px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -265px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -277px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -181px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -169px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -241px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -253px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -109px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -97px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -289px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -301px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -85px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -73px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -25px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -37px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -13px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -1px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -121px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -133px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -61px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -49px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -217px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -229px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -205px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -193px -58px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -145px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -157px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -277px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -265px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -169px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -181px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -253px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -241px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -97px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -109px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -301px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -289px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -73px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -85px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -37px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -25px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -1px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -13px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -133px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -121px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -49px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -61px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -229px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -217px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -193px 0px;"></div><div class="gt_cut_fullbg_slice" style="background-image: url(&quot;http://static.geetest.com/pictures/gt/895656306/895656306.webp&quot;); background-position: -205px 0px;"></div></div>"""
 
@@ -88,6 +98,38 @@ def get_dist(image1_url,image2_url):
             elif sum(im.getpixel((i,j))) <=120:
                 color_count = 0
     return im,-1
+
+def capture(url):
+    file_path = save_dir + os.sep + "%s.png"%str(url)
+    if os.path.exists(file_path):
+        print '== == == %s exist' %(url)
+        return
+    print url
+    display = Display(visible=0, size=(1920, 1080))
+    display.start()
+    try:
+        browser = webdriver.Chrome()
+    except Exception, e:
+        print 'e0'
+        print e
+        return
+    wait_time = 1
+    try:
+        time.sleep(2)
+        browser.get("http://"+url)
+    except socket.timeout:
+        print 'exit, socket, timeout'
+    except Exception, e:
+        print 'e1', e
+    try:
+        browser.save_screenshot(file_path)
+    except Exception, e:
+        print 'e2', e
+    else:
+        print "+++ +++ +++ %s" % (file_path)
+
+    browser.quit()
+    display.stop()
 
 
 headers = {'Accept':'*/*',
@@ -249,35 +291,24 @@ def get_validate(gt,challenge,dist):
             links.append(web_site+item.attrib['href'])
         return links
 
+file_save_path = '/home/moma/Documents/codes/capture_project/results/'
+def write_result(link,headers):
+    res = requests.get(link,headers = headers)
+    sel = Selector(text = res.content)
+    title = sel.xpath('//div[@class="overview"]/dl/dd/text()')[1].extract()
+    # title = sel.xpath('//div[@class="details clearfix"]//div[@class="classify"]/text()').extract()[0]
+    content = sel.xpath('//div[@class = "details clearfix"]//text()').extract()
+    clean_content = re.sub(r'[\r\n\t]*','',''.join(content))
+    # clean_content = re.sub(r'\s+',' ',clean_content)
+    file_path = file_save_path + title +'.txt'
+    with open(file_path,'wb') as f:
+        f.write(clean_content)
+
+
 
 
 
 if "__main__" == __name__:
-    # img = Image.open('/home/moma/Downloads/fullbg.jpg')
-    # img2 = Image.open('/home/moma/Downloads/bg.jpg')
-    # print img.size
-    # pos = get_pos(ss)
-    # print pos
-    # im = recover(img,pos)
-    # im2 = recover(img2,pos)
-    # im.show()
-    # im2.show()
-    # # im3 = ImageChops.invert(im2)
-    # # Image.blend(im,im3,0.5).show()
-    # # ImageChops.difference(im,im2).show()
-    # image,distance = get_dist(im,im2)
-    # print "distance is ",distance
-    # box = (distance,0,distance+100,58)
-    # image.crop(box).show()
-    
-
-
-
-
-
-
-
-
     # searchword='百度'
     pageNo=1
     data_href='http://www.gsxt.gov.cn/corp-query-search-%s.html' %(pageNo)
@@ -291,21 +322,27 @@ if "__main__" == __name__:
         "Referer": "http://www.gsxt.gov.cn/index.html", 
         "Cache-Control": "max-age=0"
     }
-
     # searchwords = ['百度','新浪','网易','阿里巴巴','腾讯','滴滴','饿了么']
-
-
+    # headers = {
+    # "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+    # "Accept-Encoding": "gzip, deflate",
+    # "Accept-Language":"en-US,en;q=0.8",
+    # "Cache-Control":"max-age=0",
+    # "Connection":"keep-alive",
+    # "Content-Length":"218",
+    # "Content-Type":"application/x-www-form-urlencoded",
+    # "Cookie":"__jsluid=ab32016d61fdac95c25741901b64936b; UM_distinctid=15de9b8a585254-0c13ae767d293c-1c2f170b-1fa400-15de9b8a5881e7; Hm_lvt_d7682ab43891c68a00de46e9ce5b76aa=1503134021; Hm_lpvt_d7682ab43891c68a00de46e9ce5b76aa=1503300394; CNZZDATA1261033118=1468702795-1502861478-null%7C1503466331; JSESSIONID=DAE14DBF4D37999BA31881B790565849-n1:-1; Hm_lvt_cdb4bc83287f8c1282df45ed61c4eac9=1502867416,1503133180,1503133499,1503135143; Hm_lpvt_cdb4bc83287f8c1282df45ed61c4eac9=1503466488; tlb_cookie=42query_8080",
+    # "Host":"www.gsxt.gov.cn",
+    # "Origin":"http://www.gsxt.gov.cn",
+    # "Referer":"http://www.gsxt.gov.cn/corp-query-homepage.html",
+    # "Upgrade-Insecure-Requests":"1",
+    # "User-Agent":"Baiduspider+(+http://www.baidu.com/search/spider.htm)"
+    # }
+    #    "User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36" 
 
 
     #####要搜索的关键词
     searchwords = ['百度','网易']
-
-
-
-
-
-
-
     for searchword in searchwords:
         gt,challenge,dist = fake_ax()
         print gt
@@ -334,12 +371,14 @@ if "__main__" == __name__:
             links=get_uri(page)
 
             print '查询结果如下:'
-            result_path = '/home/moma/Documents/codes/capture_project/results/'+searchword+'.txt'
+            result_path = searchword+'.txt'
             # result_path = '/home/moma/Documents/codes/capture_project/results/'+searchword+'.txt'
-            with open(result_path,'wb') as f:
-                for link in links:
-                    print link
-                    f.write(link+'\n')
+            # with open(result_path,'wb') as f:
+            for link in links:
+                print link
+                write_result(link,headers)
+                # capture(link)
+                    # f.write(link+'\n')
                 # content = requests.get(link,headers=headers).content
                 # print content.xpath()
 
